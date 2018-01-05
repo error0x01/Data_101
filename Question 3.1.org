@@ -1,0 +1,26 @@
+** Question 3.1.org
+
+La realidad es que si hubiésemos aplicado el “Data Management”, muchas
+de las acciones que hemos tenido que realizar nos las hubiésemos
+evitado porque deberían estar controladas de otra forma.
+
+Explica qué habrías hecho diferente centrándote en las “patas”:
+
+    - Data Quality
+    
+    - Master Data
+    
+    - Data Modeling & Design (me refiero a cómo están
+    definidas las tablas en origen)
+
+Habría procurado mejorar la calidad de los datos de las tablas
+procurando que los mismos fuesen fiables, precisos y principalmente
+consistentes además de definir las PK y FK de las distintas tablas.
+
+Utilizaría medidas (a nivel de aplicación) que permitiesen
+estandarizar o unificar el criterio a la hora de nombrar campos de
+forma que no haya problemas al ejecutar un SELECT DISCTINCT
+
+Además procuraría eliminar los datos duplicados, evitar campos
+críticos con datos vacios que deberían de estar rellenos, así como la
+falta de datos clave adecuadamente relacionados (a nivel de datos)

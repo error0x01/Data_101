@@ -1,0 +1,40 @@
+* Modificaciones sobre el diseño.org
+
+Después de todo lo visto nuestro ecosistema quedaría así:
+
+           +-----+
+           | CRM | ----------------- 
+           +-----+                 |
+		                           |    +-----------------------------------+
+		                           |    |          DATAWAREHOUSE            |
+           +------------+          |    |   +-----+    +-----+    +-----+   |
+           | Facturador | ---------|----|-- |STAGE| -> |ODS  | -> |DDS  |   |
+           +------------+          |    |   +-----+    +-----+    +-----+   |
+		                           |    |                                   |
+           +-----+                 |    +-----------------------------------+
+           | IVR | ----------------- 
+           +-----+
+
+¿Lo dejarías así o plantearías otro diseño mejorado? 
+
+
+           +-----+
+           | CRM | ----------------- 
+           +-----+                 |
+		                           |    +--------------------------------------------+
+		                           |    |          DATAWAREHOUSE                     |
+           +------------+          |    |   +-----+    +-----+    +-----+    +----+  |
+           | Facturador | ---------|----|-- |STAGE| -> |TUNE | -> |ODS  | -> |DDS |  |
+           +------------+          |    |   +-----+    +-----+    +-----+    +----+  |
+		                           |    |                                            |
+           +-----+                 |    +--------------------------------------------+
+           | IVR | ----------------- 
+           +-----+
+
+Teniendo en cuenta que la BBDD de STAGE no la podemos tocar yo
+realizaría una copia adicional de STAGE a la que llamaría TUNE, donde
+ejecutaría, antes de desarrollar los modelos en ODS, "adaptaciones
+básicas sin modificar el esquema de BBDD de producción" como los
+cambios de nombre de paises, estados, etc de forma que se simplifiquen
+las queries de los modelos de BI. Básicamente serían modificaciones de
+contexto, ya que estructuralmente no se modificarían las BBDD.

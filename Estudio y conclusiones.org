@@ -1,0 +1,423 @@
+* Estudio y conclusiones.org
+
+Para desarrollar los modelos correctamente hay que entender
+adecuadamente los datos y las distintas tablas y bases de datos donde
+conviven.
+
+Una vez se dispone de una visión clara (o lo más clara posible) de los
+datos operativos, se plantean los distintos modelos de negocio que se
+identifican como necesarios y tras un diseño unitario de cada uno de
+ellos, se puede componer el diseño conjunto.
+
+En la siguiente tabla se visualiza la relación entre las distintas
+tablas que componen los modelos y cada uno de ellos.
+
+| tablas \ modelos          | Clientes | Servicios | Facturas | Llamadas |
+|---------------------------+----------+-----------+----------+----------|
+| ODS_HC_CLIENTE            | x        | x         | x        | x        |
+| ODS_DM_SEXO               | n        |           |          |          |
+| ODS_DM_PROFESIONES        | n        |           |          |          |
+| ODS_DM_COMPANYAS          | n        |           |          |          |
+| ODS_HC_DIRECCIONES        | x        | x         |          |          |
+| ODS_DM_CIUDADES_ESTADO    | x        | x         |          |          |
+| ODS_DM_PAISES             | x        | x         |          |          |
+| ODS_HC_SERVICIOS          |          | n         |          |          |
+| ODS_DM_CANALES            |          | n         |          |          |
+| ODS_DM_PRODUCTOS          |          | n         |          |          |
+| ODS_HC_FACTURAS           |          |           | n        |          |
+| ODS_DM_METODOS_PAGO       |          |           | n        |          |
+| ODS_DM_CICLOS_FACTURACION |          |           | n        |          |
+| ODS_HC_LLAMADS            |          |           |          | n        |
+| ODS_DM_AGENTES            |          |           |          | n        |
+| ODS_DM_DEPARTAMENTOS      |          |           |          | n        |
+|---------------------------+----------+-----------+----------+----------|
+
+La "x" indica que la tabla pertenece al modelo concreto y a otros, y
+la "n" indica que NO pertenece a otros modelos. Esto implica que debe
+de tenerse en especial consideración las tablas que aparecen en varios
+modelos por distintos motivos, como que pueden verse afectadas por
+varias fuentes de datos distintas.
+
+** Aspectos generales a tener en cuenta al desarrollar los modelos
+
+- Las PK no pueden tener valores nulos y se definen al crear las tablas
+- Las PK no pueden contener registros repetidos ni nulos
+- Las FK no pueden tener registros que no aparecen en las PK
+- Dado que modificar la BBDD de STAGE no es una práctica correcta, si
+  existen cambios que realizar sobre tablas o columnas se realizará en
+  PODS (la BBDD de creada para la práctica). Por ejemplo, tras la
+  tabla STG_PRODUCTOS_CRM se reemplazarán todas las entradas de
+  PRODUCT_CITY que no estén alineadas con las de la columna CITY de la
+  tabla STG_CLIENTES_CRM. En el caso actual se reemplaza "UNITED
+  STATES" por "US"
+- Tener cuidado de establecer la BBDD con la que se trabaja para no
+  realizar modificaciones en la BBDD errónea.
+
+** Revisamos tabla para análisis de STG_CLIENTES_CRM
+*** Resultados STG_CLIENTES_CRM al modelo de CLIENTES
+
+La siguiente tabla fué analizada durante el curso, por lo que no se
+realizan comentarios adicionales, ya que no se han realizado cambios
+estructurales sobre la misma. 
+
+Los únicos cambios que se han realizado ha sido programar los inserts
+mediante "SELECT DISTINCT" en algunos casos, en lugar de realizar los
+INSERT de los datos directamente.
+
+Por nombrar los aspectos más relevantes:
+
+- El número total de registros coincide con el número de
+  identificadores de clientes, 17558, y junto al nombre de los
+  clientes son los únicos campos que están siempre cumplimentados, no
+  siendo así en el caso de los apellidos y el resto tienen campos
+  nulos en mayor o menor medida.
+
+- Las decisiones acerca de que campos son relevantes a nivel de
+  negocio para que nuestro modelo sea consistente se fueron tomando
+  durante las sesiones formativas.
+
+|--------------------------------+--------|
+| Registros                      | Número |
+|--------------------------------+--------|
+| TOTAL_REGISTROS                |  17558 |
+| TOTAL_CUSTOMER_ID              |  17558 |
+| TOTAL_DISTINTOS_CUSTOMER_ID    |  17558 |
+| TOTAL_FIRST_NAME               |  17558 |
+| TOTAL_DISTINTOS_FIRST_NAME     |   7314 |
+| TOTAL_LAST_NAME                |  17497 |
+| TOTAL_DISTINTOS_LAST_NAME      |  14577 |
+| TOTAL_IDENTIFIED_DOC           |  17497 |
+| TOTAL_DISTINTOS_IDENTIFIED_DOC |  17498 |
+| TOTAL_GENDER                   |  17497 |
+| TOTAL_DISTINTOS_GENDER         |      3 |
+| TOTAL_CITY                     |  17497 |
+| TOTAL_DISTINTOS_CITY           |     82 |
+| TOTAL_ADDRESS                  |  17497 |
+| TOTAL_DISTINTOS_ADDRESS        |  17439 |
+| TOTAL_POSTAL_CODE              |  17497 |
+| TOTAL_DISTINTOS_POSTAL_CODE    |    274 |
+| TOTAL_STATE                    |  17497 |
+| TOTAL_DISTINTOS_STATE          |      4 |
+| TOTAL_COUNTRY                  |  17497 |
+| TOTAL_DISTINTOS_COUNTRY        |      2 |
+| TOTAL_PHONE                    |  17497 |
+| TOTAL_DISTINTOS_PHONE          |  17498 |
+| TOTAL_EMAIL                    |  17497 |
+| TOTAL_DISTINTOS_EMAIL          |  17498 |
+| TOTAL_BIRTHDAY                 |  17497 |
+| TOTAL_DISTINTOS_BIRTHDAY       |  10753 |
+| TOTAL_PROFESION                |  17497 |
+| TOTAL_DISTINTOS_PROFESION      |    196 |
+| TOTAL_COMPANY                  |  17451 |
+| TOTAL_DISTINTOS_COMPANY        |    384 |
+|--------------------------------+--------|
+
+*** Consulta STG_CLIENTES_CRM
+
+USE STAGE;
+
+SELECT COUNT(*) TOTAL_REGISTROS
+, SUM(CASE WHEN LENGTH(TRIM(CUSTOMER_ID))<>0 THEN 1 ELSE 0 END) TOTAL_CUSTOMER_ID
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(CUSTOMER_ID))<>0 THEN CUSTOMER_ID ELSE 0 END) TOTAL_DISTINTOS_CUSTOMER_ID
+, SUM(CASE WHEN LENGTH(TRIM(FIRST_NAME))<>0 THEN 1 ELSE 0 END) TOTAL_FIRST_NAME
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(FIRST_NAME))<>0 THEN FIRST_NAME ELSE 0 END) TOTAL_DISTINTOS_FIRST_NAME
+, SUM(CASE WHEN LENGTH(TRIM(LAST_NAME))<>0 THEN 1 ELSE 0 END) TOTAL_LAST_NAME
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(LAST_NAME))<>0 THEN LAST_NAME ELSE 0 END) TOTAL_DISTINTOS_LAST_NAME
+, SUM(CASE WHEN LENGTH(TRIM(IDENTIFIED_DOC))<>0 THEN 1 ELSE 0 END) TOTAL_IDENTIFIED_DOC
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(IDENTIFIED_DOC))<>0 THEN IDENTIFIED_DOC ELSE 0 END) TOTAL_DISTINTOS_IDENTIFIED_DOC
+, SUM(CASE WHEN LENGTH(TRIM(GENDER))<>0 THEN 1 ELSE 0 END) TOTAL_GENDER
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(GENDER))<>0 THEN GENDER ELSE 0 END) TOTAL_DISTINTOS_GENDER
+, SUM(CASE WHEN LENGTH(TRIM(CITY))<>0 THEN 1 ELSE 0 END) TOTAL_CITY
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(CITY))<>0 THEN CITY ELSE 0 END) TOTAL_DISTINTOS_CITY
+, SUM(CASE WHEN LENGTH(TRIM(ADDRESS))<>0 THEN 1 ELSE 0 END) TOTAL_ADDRESS
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(ADDRESS))<>0 THEN ADDRESS ELSE 0 END) TOTAL_DISTINTOS_ADDRESS
+, SUM(CASE WHEN LENGTH(TRIM(POSTAL_CODE))<>0 THEN 1 ELSE 0 END) TOTAL_POSTAL_CODE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(POSTAL_CODE))<>0 THEN POSTAL_CODE ELSE 0 END) TOTAL_DISTINTOS_POSTAL_CODE
+, SUM(CASE WHEN LENGTH(TRIM(STATE))<>0 THEN 1 ELSE 0 END) TOTAL_STATE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(STATE))<>0 THEN STATE ELSE 0 END) TOTAL_DISTINTOS_STATE
+, SUM(CASE WHEN LENGTH(TRIM(COUNTRY))<>0 THEN 1 ELSE 0 END) TOTAL_COUNTRY
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(COUNTRY))<>0 THEN COUNTRY ELSE 0 END) TOTAL_DISTINTOS_COUNTRY
+, SUM(CASE WHEN LENGTH(TRIM(PHONE))<>0 THEN 1 ELSE 0 END) TOTAL_PHONE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PHONE))<>0 THEN PHONE ELSE 0 END) TOTAL_DISTINTOS_PHONE
+, SUM(CASE WHEN LENGTH(TRIM(EMAIL))<>0 THEN 1 ELSE 0 END) TOTAL_EMAIL
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(EMAIL))<>0 THEN EMAIL ELSE 0 END) TOTAL_DISTINTOS_EMAIL
+, SUM(CASE WHEN LENGTH(TRIM(BIRTHDAY))<>0 THEN 1 ELSE 0 END) TOTAL_BIRTHDAY
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(BIRTHDAY))<>0 THEN BIRTHDAY ELSE 0 END) TOTAL_DISTINTOS_BIRTHDAY
+, SUM(CASE WHEN LENGTH(TRIM(PROFESION))<>0 THEN 1 ELSE 0 END) TOTAL_PROFESION
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PROFESION))<>0 THEN PROFESION ELSE 0 END) TOTAL_DISTINTOS_PROFESION
+, SUM(CASE WHEN LENGTH(TRIM(COMPANY))<>0 THEN 1 ELSE 0 END) TOTAL_COMPANY
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(COMPANY))<>0 THEN COMPANY ELSE 0 END) TOTAL_DISTINTOS_COMPANY
+FROM STAGE.STG_CLIENTES_CRM;
+
+** Revisamos tabla para análisis STG_PRODUCTOS_CRM
+*** Resultados STG_PRODUCTOS_CRM al modelo de SERVICIOS
+
+Reorganizar la tabla de datos en distintos grupos nos permite
+identificar la siguiente información relevante:
+
+- El número total de registros (78495) coincide con el total de
+  productos, disponiendo cada uno de ellos de un identificador
+  distinto. Sin embargo el nombre de los productos se limita a 6, de
+  donde deducimos que éstos se corresponden con los servicios de la
+  empresa.
+  + Conclusión: Hay que crear una dimensión para los servicios
+    (ODS_DM_PRODUCTOS) para posteriormente, al importar los datos de
+    STAGE, identificar los mismos mediante un identificador numérico
+    (ID_PRODUCTO) en lugar del nombre del mismo (DE_PRODUCTO), y con
+    los canales de venta tenemos una situación similar.
+
+- A la hora de insertar en la tabla ODS_DM_CIUDADES_ESTADOS hay que
+  tener en cuenta que:
+  - es una tabla previamente creada y poblada en el modelo de
+    clientes, por lo que hay que evitar repeticiones, y con la
+    particularidad de que al final se agregan dos registros 98 y 99
+    adicionales. Para poder insertar entre el último registro
+    introducido y el índice 98 se utiliza un TRIGGER, dado que de otra
+    forma los datos se insertan a partir del índice 100.
+  - hay entradas (221) en las que el campo PRODUCT_CITY no esta está
+    cumplimentado, y dado que en estos casos faltan la mayoría de los
+    datos, no los vamos a insertar.
+  - hay entradas en las que el campo PRODUCT_STATE no esta está
+    cumplimentado. Sin embargo, en este caso, en la mayoría de los
+    casos tienen casi todos los datos, incluyendo el código postal,
+    por lo que no se va a tener en cuenta, ya que resolvemos el mayor
+    problema que se da cuando éste y PRODUCT_CITY está vacío.    
+
+- La tabla de HC_DIRECCIONES es similar al caso de CIUDADES_ESTADO, con
+  la diferencia de que cuando añadimos las direcciones de la BBDD de
+  Productos a la tabla previamente creada en principio creo que daría
+  igual repetir las direcciones ya que se trata de una tabla HC. Al
+  igual que en el caso anterior se van a incluir solo las que sean
+  diferentes de las fueron introducidas al poblar el modelo de
+  clientes, pero de ésta forma se corre el riesgo de incluir la misma
+  dirección pero escrita de forma distinta cosa que NO se va a
+  verificar.
+
+Para poblar la tabla ODS_HC_SERVICIOS se tiene en cuenta que:
+
+- El número total de clientes es 8001 y es una FK de la tabla de
+  clientes que ha sido previamente poblada. Por esa razón tenemos que
+  asegurar que los clientes que pueblan nuestra tabla aparecen en
+  ODS_HC_CLIENTES mediante un INNER JOIN.
+
+- Existen ACCESS_POINT con entradas en blanco que hay que eliminar
+
+- El caso de los canales es idéntico al de los productos y ya hemos
+  comentado que se basa en la creación de tablas maestras
+
+- Obtener el ID_DIRECCION es uno de los casos más complejos por el
+  tipo de jerarquía del modelo
+
+- El caso de los códigos de agente es idéntico al de los puntos de acceso
+
+- Las fechas deben de tener el formato adecuado, por lo que se utiliza
+  STR_TO_DATE para adecuarlo
+
+- El campo dirección tiene el mismo formato que se definió para el
+  modelo de CLIENTES. Sin embargo, hay que validar que los valores
+  comunes ya insertados no se repiten. Para ello se requiere el
+  soporte de dos tablas temporales que facilitan la inserción del
+  ID_DIRECCION basado en el cruce de los identificadores de producto
+  de los datos de la BBDD de productos y las tablas temporales.
+
+|-------------------------------------+--------|
+| Registros                           | Número |
+|-------------------------------------+--------|
+| TOTAL_REGISTROS                     |  78495 |
+| TOTAL_PRODUCT_ID                    |  78495 |
+| TOTAL_DISTINTOS_PRODUCT_ID          |  78495 |
+| TOTAL_PRODUCT_NAME                  |  78495 |
+| TOTAL_DISTINTOS_PRODUCT_NAME        |      6 |
+|-------------------------------------+--------|
+| TOTAL_CUSTOMER_ID                   |  78495 |
+| TOTAL_DISTINTOS_CUSTOMER_ID         |   8001 |
+|-------------------------------------+--------|
+| TOTAL_ACCESS_POINT                  |  78274 |
+| TOTAL_DISTINTOS_ACCESS_POINT        |  78275 |
+|-------------------------------------+--------|
+| TOTAL_CHANNEL                       |  78274 |
+| TOTAL_DISTINTOS_CHANNEL             |      5 |
+|-------------------------------------+--------|
+| TOTAL_AGENT_CODE                    |  42630 |
+| TOTAL_DISTINTOS_AGENT_CODE          |    701 |
+|-------------------------------------+--------|
+| TOTAL_START_DATE                    |  78495 |
+| TOTAL_DISTINTOS_START_DATE          |   8035 |
+| TOTAL_INSTALL_DATE                  |  75363 |
+| TOTAL_DISTINTOS_INSTALL_DATE        |  75360 |
+| TOTAL_END_DATE                      |  46684 |
+| TOTAL_DISTINTOS_END_DATE            |  46683 |
+|-------------------------------------+--------|
+| TOTAL_PRODUCT_COUNTRY               |  78274 |
+| TOTAL_DISTINTOS_PRODUCT_COUNTRY     |      2 |
+| TOTAL_PRODUCT_STATE                 |  78090 |
+| TOTAL_DISTINTOS_PRODUCT_STATE       |      4 |
+| TOTAL_PRODUCT_CITY                  |  78274 |
+| TOTAL_DISTINTOS_PRODUCT_CITY        |     82 |
+| TOTAL_PRODUCT_POSTAL_CODE           |  78274 |
+| TOTAL_DISTINTOS_PRODUCT_POSTAL_CODE |    274 |
+| TOTAL_PRODUCT_ADDRESS               |  78274 |
+| TOTAL_DISTINTOS_PRODUCT_ADDRESS     |  77037 |
+|-------------------------------------+--------|
+*** Consulta STG_PRODUCTOS_CRM
+
+USE STAGE;
+
+SELECT COUNT(*) TOTAL_REGISTROS
+, SUM(CASE WHEN LENGTH(TRIM(PRODUCT_ID))<>0 THEN 1 ELSE 0 END) TOTAL_PRODUCT_ID
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PRODUCT_ID))<>0 THEN PRODUCT_ID ELSE 0 END) TOTAL_DISTINTOS_PRODUCT_ID
+, SUM(CASE WHEN LENGTH(TRIM(CUSTOMER_ID))<>0 THEN 1 ELSE 0 END) TOTAL_CUSTOMER_ID
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(CUSTOMER_ID))<>0 THEN CUSTOMER_ID ELSE 0 END) TOTAL_DISTINTOS_CUSTOMER_ID
+, SUM(CASE WHEN LENGTH(TRIM(PRODUCT_NAME))<>0 THEN 1 ELSE 0 END) TOTAL_PRODUCT_NAME
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PRODUCT_NAME))<>0 THEN PRODUCT_NAME ELSE 0 END) TOTAL_DISTINTOS_PRODUCT_NAME
+, SUM(CASE WHEN LENGTH(TRIM(ACCESS_POINT))<>0 THEN 1 ELSE 0 END) TOTAL_ACCESS_POINT
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(ACCESS_POINT))<>0 THEN ACCESS_POINT ELSE 0 END) TOTAL_DISTINTOS_ACCESS_POINT
+, SUM(CASE WHEN LENGTH(TRIM(CHANNEL))<>0 THEN 1 ELSE 0 END) TOTAL_CHANNEL
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(CHANNEL))<>0 THEN CHANNEL ELSE 0 END) TOTAL_DISTINTOS_CHANNEL
+, SUM(CASE WHEN LENGTH(TRIM(AGENT_CODE))<>0 THEN 1 ELSE 0 END) TOTAL_AGENT_CODE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(AGENT_CODE))<>0 THEN AGENT_CODE ELSE 0 END) TOTAL_DISTINTOS_AGENT_CODE
+, SUM(CASE WHEN LENGTH(TRIM(START_DATE))<>0 THEN 1 ELSE 0 END) TOTAL_START_DATE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(START_DATE))<>0 THEN START_DATE ELSE 0 END) TOTAL_DISTINTOS_START_DATE
+, SUM(CASE WHEN LENGTH(TRIM(INSTALL_DATE))<>0 THEN 1 ELSE 0 END) TOTAL_INSTALL_DATE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(INSTALL_DATE))<>0 THEN INSTALL_DATE ELSE 0 END) TOTAL_DISTINTOS_INSTALL_DATE
+, SUM(CASE WHEN LENGTH(TRIM(END_DATE))<>0 THEN 1 ELSE 0 END) TOTAL_END_DATE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(END_DATE))<>0 THEN END_DATE ELSE 0 END) TOTAL_DISTINTOS_END_DATE
+, SUM(CASE WHEN LENGTH(TRIM(PRODUCT_CITY))<>0 THEN 1 ELSE 0 END) TOTAL_PRODUCT_CITY
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PRODUCT_CITY))<>0 THEN PRODUCT_CITY ELSE 0 END) TOTAL_DISTINTOS_PRODUCT_CITY
+, SUM(CASE WHEN LENGTH(TRIM(PRODUCT_ADDRESS))<>0 THEN 1 ELSE 0 END) TOTAL_PRODUCT_ADDRESS
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PRODUCT_ADDRESS))<>0 THEN PRODUCT_ADDRESS ELSE 0 END) TOTAL_DISTINTOS_PRODUCT_ADDRESS
+, SUM(CASE WHEN LENGTH(TRIM(PRODUCT_POSTAL_CODE))<>0 THEN 1 ELSE 0 END) TOTAL_PRODUCT_POSTAL_CODE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PRODUCT_POSTAL_CODE))<>0 THEN PRODUCT_POSTAL_CODE ELSE 0 END) TOTAL_DISTINTOS_PRODUCT_POSTAL_CODE
+, SUM(CASE WHEN LENGTH(TRIM(PRODUCT_STATE))<>0 THEN 1 ELSE 0 END) TOTAL_PRODUCT_STATE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PRODUCT_STATE))<>0 THEN PRODUCT_STATE ELSE 0 END) TOTAL_DISTINTOS_PRODUCT_STATE
+, SUM(CASE WHEN LENGTH(TRIM(PRODUCT_COUNTRY))<>0 THEN 1 ELSE 0 END) TOTAL_PRODUCT_COUNTRY
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PRODUCT_COUNTRY))<>0 THEN PRODUCT_COUNTRY ELSE 0 END) TOTAL_DISTINTOS_PRODUCT_COUNTRY
+FROM STAGE.STG_PRODUCTOS_CRM;
+
+** Revisamos la tabla STG_FACTURAS_FCT
+*** Resultados STG_FACTURAS_FCT al modelo de FACTURAS
+
+- El volumen de facturas es 420000 al igual que el de registros, y
+  todos son distintos
+
+- Las fechas tienen un formato que incluye h:m:s, por lo que debe de
+  tenerse en cuenta
+
+- Se crea una nueva tabla de dimensiones para los ciclos de
+  facturación
+
+- Se crea una nueva tabla de dimensiones para los métodos de pago
+
+- Las cantidades hay que redondearlas utilizando ROUND
+
+- Para hacer el INSERT en ODS_HC_FACTURAS hay que anular de forma
+  controlada la validación de las FK temporalmente mediante SET
+  FOREIGN_KEY_CHECKS=0;
+
+| Registros                      | Número |
+|--------------------------------+--------|
+| TOTAL_REGISTROS                | 420000 |
+| TOTAL_BILL_REF_NO              | 420000 |
+| TOTAL_DISTINTOS_BILL_REF_NO    | 420000 |
+| TOTAL_CUSTOMER_ID              | 420000 |
+| TOTAL_DISTINTOS_CUSTOMER_ID    |  20000 |
+| TOTAL_START_DATE               | 420000 |
+| TOTAL_DISTINTOS_START_DATE     |     40 |
+| TOTAL_END_DATE                 | 420000 |
+| TOTAL_DISTINTOS_END_DATE       |     20 |
+| TOTAL_STATEMENT_DATE           | 420000 |
+| TOTAL_DISTINTOS_STATEMENT_DATE |     40 |
+| TOTAL_PAYMENT_DATE             | 420000 |
+| TOTAL_DISTINTOS_PAYMENT_DATE   |    400 |
+| TOTAL_AMOUNT                   | 420000 |
+| TOTAL_DISTINTOS_AMOUNT         |   5604 |
+|--------------------------------+--------|
+| TOTAL_BILL_CYCLE               | 420000 |
+| TOTAL_DISTINTOS_BILL_CYCLE     |      2 |
+|--------------------------------+--------|
+| TOTAL_BILL_METHOD              | 420000 |
+| TOTAL_DISTINTOS_BILL_METHOD    |      3 |
+|--------------------------------+--------|
+
+*** Consulta STG_FACTURAS_FCT
+
+use STAGE;
+
+SELECT COUNT(*) TOTAL_REGISTROS
+, SUM(CASE WHEN LENGTH(TRIM(BILL_REF_NO))<>0 THEN 1 ELSE 0 END) TOTAL_BILL_REF_NO
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(BILL_REF_NO))<>0 THEN BILL_REF_NO ELSE 0 END) TOTAL_DISTINTOS_BILL_REF_NO
+, SUM(CASE WHEN LENGTH(TRIM(CUSTOMER_ID))<>0 THEN 1 ELSE 0 END) TOTAL_CUSTOMER_ID
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(CUSTOMER_ID))<>0 THEN CUSTOMER_ID ELSE 0 END) TOTAL_DISTINTOS_CUSTOMER_ID
+, SUM(CASE WHEN LENGTH(TRIM(START_DATE))<>0 THEN 1 ELSE 0 END) TOTAL_START_DATE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(START_DATE))<>0 THEN START_DATE ELSE 0 END) TOTAL_DISTINTOS_START_DATE
+, SUM(CASE WHEN LENGTH(TRIM(END_DATE))<>0 THEN 1 ELSE 0 END) TOTAL_END_DATE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(END_DATE))<>0 THEN END_DATE ELSE 0 END) TOTAL_DISTINTOS_END_DATE
+, SUM(CASE WHEN LENGTH(TRIM(STATEMENT_DATE))<>0 THEN 1 ELSE 0 END) TOTAL_STATEMENT_DATE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(STATEMENT_DATE))<>0 THEN STATEMENT_DATE ELSE 0 END) TOTAL_DISTINTOS_STATEMENT_DATE
+, SUM(CASE WHEN LENGTH(TRIM(PAYMENT_DATE))<>0 THEN 1 ELSE 0 END) TOTAL_PAYMENT_DATE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PAYMENT_DATE))<>0 THEN PAYMENT_DATE ELSE 0 END) TOTAL_DISTINTOS_PAYMENT_DATE
+, SUM(CASE WHEN LENGTH(TRIM(BILL_CYCLE))<>0 THEN 1 ELSE 0 END) TOTAL_BILL_CYCLE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(BILL_CYCLE))<>0 THEN BILL_CYCLE ELSE 0 END) TOTAL_DISTINTOS_BILL_CYCLE
+, SUM(CASE WHEN LENGTH(TRIM(AMOUNT))<>0 THEN 1 ELSE 0 END) TOTAL_AMOUNT
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(AMOUNT))<>0 THEN AMOUNT ELSE 0 END) TOTAL_DISTINTOS_AMOUNT
+, SUM(CASE WHEN LENGTH(TRIM(BILL_METHOD))<>0 THEN 1 ELSE 0 END) TOTAL_BILL_METHOD
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(BILL_METHOD))<>0 THEN BILL_METHOD ELSE 0 END) TOTAL_DISTINTOS_BILL_METHOD
+FROM STAGE.STG_FACTURAS_FACT;
+
+** Revisamos la tabla STG_CONTACTOS_IVR
+*** Resultados STG_CONTACTOS_IVR al modelo de LLAMADAS
+
+Éste modelo ha resultado el más complejo a la hora de interpretar la
+lógica del mismo debido a la aparente falta de coherencia en los datos
+con respecto al resto de tablas.
+
+No hay correlación entre los registros de clientes con los contactos
+de la base de datos STG_CLIENTES_CRM en el posible punto común que es
+el número de teléfono. Por lo que no sé porque aparecen 185018
+registros.
+
+El resto de campos tienen relaciones evidentes con la fuente origen de
+los mismos, similar a los análisis anteriores.
+
+|--------------------------------+--------|
+| Registros                      | Número |
+|--------------------------------+--------|
+| TOTAL_REGISTROS                | 202717 |
+| TOTAL_ID                       | 202717 |
+| TOTAL_DISTINTOS_ID             | 150000 |
+| TOTAL_PHONE_NUMBER             | 185018 |
+| TOTAL_DISTINTOS_PHONE_NUMBER   |  18226 |
+| TOTAL_START_DATETIME           | 202717 |
+| TOTAL_DISTINTOS_START_DATETIME | 201098 |
+| TOTAL_END_DATETIME             | 186535 |
+| TOTAL_DISTINTOS_END_DATETIME   | 183678 |
+|--------------------------------+--------|
+| TOTAL_SERVICE                  | 202502 |
+| TOTAL_DISTINTOS_SERVICE        |      7 |
+| TOTAL_FLG_TRANSFER             | 202717 |
+| TOTAL_DISTINTOS_FLG_TRANSFER   |      2 |
+|--------------------------------+--------|
+| TOTAL_AGENT                    | 194739 |
+| TOTAL_DISTINTOS_AGENT          |    594 |
+|--------------------------------+--------|
+
+*** Consulta STG_CONTACTOS_IVR
+
+USE STAGE;
+
+SELECT COUNT(*) TOTAL_REGISTROS
+, SUM(CASE WHEN LENGTH(TRIM(ID))<>0 THEN 1 ELSE 0 END) TOTAL_ID
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(ID))<>0 THEN ID ELSE 0 END) TOTAL_DISTINTOS_ID
+, SUM(CASE WHEN LENGTH(TRIM(PHONE_NUMBER))<>0 THEN 1 ELSE 0 END) TOTAL_PHONE_NUMBER
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(PHONE_NUMBER))<>0 THEN PHONE_NUMBER ELSE 0 END) TOTAL_DISTINTOS_PHONE_NUMBER
+, SUM(CASE WHEN LENGTH(TRIM(START_DATETIME))<>0 THEN 1 ELSE 0 END) TOTAL_START_DATETIME
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(START_DATETIME))<>0 THEN START_DATETIME ELSE 0 END) TOTAL_DISTINTOS_START_DATETIME
+, SUM(CASE WHEN LENGTH(TRIM(END_DATETIME))<>0 THEN 1 ELSE 0 END) TOTAL_END_DATETIME
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(END_DATETIME))<>0 THEN END_DATETIME ELSE 0 END) TOTAL_DISTINTOS_END_DATETIME
+, SUM(CASE WHEN LENGTH(TRIM(SERVICE))<>0 THEN 1 ELSE 0 END) TOTAL_SERVICE
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(SERVICE))<>0 THEN SERVICE ELSE 0 END) TOTAL_DISTINTOS_SERVICE
+, SUM(CASE WHEN LENGTH(TRIM(FLG_TRANSFER))<>0 THEN 1 ELSE 0 END) TOTAL_FLG_TRANSFER
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(FLG_TRANSFER))<>0 THEN FLG_TRANSFER ELSE 0 END) TOTAL_DISTINTOS_FLG_TRANSFER
+, SUM(CASE WHEN LENGTH(TRIM(AGENT))<>0 THEN 1 ELSE 0 END) TOTAL_AGENT
+, COUNT(DISTINCT CASE WHEN LENGTH(TRIM(AGENT))<>0 THEN AGENT ELSE 0 END) TOTAL_DISTINTOS_AGENT
+FROM STAGE.STG_CONTACTOS_IVR;

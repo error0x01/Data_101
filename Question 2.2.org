@@ -1,0 +1,12 @@
+* Question 2.2.org (Opcional)
+
+¿Serías capaz de separar el campo DE_DIRECCION de la tabla de
+direcciones en dos campos: NOMBRE_VIA y NUM_VIA?
+
+El campo DE_DIRECCION se compone de un número y una dirección. Para
+separarlo en dos campos se requiere:
+
+SELECT
+    SUBSTRING_INDEX(DE_DIRECCION, ' ', 1) AS NUM_VIA,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(DE_DIRECCION, '\n', 2), '\n', -1) AS NOMBRE_VIA
+FROM ODS_HC_DIRECCIONES;

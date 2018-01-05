@@ -1,0 +1,18 @@
+** Question 3.3.org (Opcional)
+
+Utilizando alguna herramienta del mercado o inventándote un modelo en
+BBDD genera la trazabilidad de la información (Data Governance).
+
+Dado que lo de inventarme un modelo en BBDD para generar la
+trazabilidad lleva más tiempo del que dispongo he optado por la opción
+de utilizar una herramienta de mercado.
+
+He encontrado una herramienta llamada [[https://getmanta.com/manta-flow-demo/][Manta]] que permite, en la zona de
+demo, utilizar distintos ejemplos en los que se puede observar la
+trazabilidad de los datos (Data Lineage) entre distintas tablas así
+como los scripts de transformación de los mismos.
+
+Se adjuntan los fichero de ejemplo:
+
+- Question 3.3.1.png
+- Question 3.3.2.png

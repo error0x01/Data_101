@@ -1,0 +1,18 @@
+* Question 3.2.org (Opcional)
+
+¿Aconsejarías algún cambio en los sistemas origen extra
+teniendo en cuenta el resto de disciplinas del Data Governance?
+
+
+Integraría medidas o herramientas de terceros para disponer de
+trazabilidad del dato desde los sistemas origen hasta los puntos
+finales de los distintos datos.
+
+El cambio más evidente es a nivel de coherencia en los datos,
+sobretodo la tabla de Contactos integración e interoperatibilidad,
+dado que no hay una consistencia apreciable.
+
+No se habla de temas de seguridad de los datos, por lo que entiendo
+que no hay medidas aplicadas a los mismos y yo aconsejaría desplegar
+medidas que asegurasen los sistemas operacionales a nivel de
+disponibilidad, integridad y confidencialidad.

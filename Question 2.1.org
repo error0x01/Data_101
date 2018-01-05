@@ -1,0 +1,16 @@
+* Question 2.1.org
+
+¿Por qué en el modelo de DIRECCIONES dejo en la misma tabla las
+CIUDADES y los ESTADOS y no los separo en dos tablas distintas para
+ser más estricta con la jerarquía: 
+
+PAIS → ESTADOS → CIUDADES → DIRECCIONES
+
+El mismo nombre de ciudad apertenece vinculado a dos estados, y si
+diseñamos las tablas de forma unitaria, con relaciones clásicas 1 a N,
+se pueden producir duplicidades.
+
+Dado que tenemos una relación N a N, creando la tabla intermedia
+CIUDADES_ESTADO aseguramos que las entradas "Glendale-Arizona" y
+"Glendale-California" se identifican unitariamente, conjuntamente con
+el resto de datos asociados, como el código postal.

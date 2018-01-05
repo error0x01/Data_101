@@ -1,0 +1,13 @@
+** Nivel SQL y comentarios.org
+
+- Nivel SQL: Mi nivel de SQL antes y ahora creo que es el mismo "Todo
+  lo que quiso saber sobre SQL y no se atrevió a preguntar", con la
+  diferencia de que ante lo tenía básicamente olvidado y el tener que
+  desarrollar este ejercicio práctico me ha obligado a volver a
+  practicarlo y recuperarlo.
+
+- Comentario extra: Este primer módulo ha sido muy interesante y
+  cumple perfectamente con mis expectativas del mismo. Me ha dado una
+  visión aproximada de lo que hacen en el área de BI, sin embargo echo
+  de menos haber visto alguna herramienta específica como Pentaho que
+  se ha nombrado con algo más de profundidad.

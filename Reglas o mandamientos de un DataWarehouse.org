@@ -1,0 +1,36 @@
+* Reglas o mandamientos de un DataWarehouse.org
+
+Escribe tus propias reglas o mandamientos de un DataWarehouse
+
+1.- Entender la cultura organizacional y el nivel de madurez de la
+organización en los relativo a la gestión del dato y cambiarlo desde
+la raíz (en lo que sea necesario), osea, las fuentes de datos, así
+como concienciar a las personas que gestionan los mismos acerca del
+buen gobierno.
+
+2.- Planificar una adecuada documentación y gestión del conocimiento
+
+3.- Asegurar la trazabilidad de los datos
+
+4.- Estructurar los modelos en función de los procesos de negocio
+
+5.- Los modelos deben estar cargados con el máximo detalle para poder
+dar respuesta a las consultas de los usuarios de negocio.
+
+6.- Asegurarse de que cada tabla de hechos tiene su correspondiente
+dimensión tiempo asociada (F_Insercion, F_Modificacion)
+
+7.- Asegurarse de que todos los hechos de la tabla de hechos tienen el
+mismo nivel de detalle
+
+8.- Utilizar tablas temporles para facilitar las consultas entre la
+tabla de hechos y las de  dimensiones
+
+9.- Utilizar tablas de dimensión que contengan los diferentes valores
+opsibles de un campo, y que contemplen otros valores como "No Aplica"
+o "Desconocido"
+
+10.- Valora constantemente los requerimientos y las realidades de la
+organización para proporcionar una solución DW que sea aceptada por
+los usuarios de negocios y que apoye su proceso de decisiones
+
